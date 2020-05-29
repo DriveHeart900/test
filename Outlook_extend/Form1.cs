@@ -23,7 +23,7 @@ namespace Outlook_extend
         Microsoft.Office.Interop.Outlook._NameSpace ns = null;
         Microsoft.Office.Interop.Outlook.Items sendEmailItems = null;
         
-
+        // githuub
         public Form1()
         {
             InitializeComponent();
