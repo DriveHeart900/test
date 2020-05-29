@@ -9,3 +9,14 @@ C:\Users\v-jili8\source\repos\Outlook_extend\Outlook_extend\obj\Debug\Outlook_ex
 C:\Users\v-jili8\source\repos\Outlook_extend\Outlook_extend\obj\Debug\Outlook_extend.pdb
 C:\Users\v-jili8\source\repos\Outlook_extend\Outlook_extend\obj\Debug\Outlook_extend.csproj.ResolveComReference.cache
 C:\Users\v-jili8\source\repos\Outlook_extend\Outlook_extend\obj\Debug\Outlook_extend.Form1.resources
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.csprojAssemblyReference.cache
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.csproj.ResolveComReference.cache
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.Form1.resources
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.Properties.Resources.resources
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.csproj.GenerateResource.cache
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.csproj.CoreCompileInputs.cache
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.exe
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\obj\Debug\Outlook_extend.pdb
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\bin\Debug\Outlook_extend.exe.config
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\bin\Debug\Outlook_extend.exe
+C:\Users\v-jili8\Desktop\github\test\Outlook_extend\bin\Debug\Outlook_extend.pdb
