@@ -83,7 +83,7 @@ namespace Outlook_extend
                 tempdic.OrderBy(KeyValuePair => KeyValuePair.Key);
                 foreach (KeyValuePair<DateTime, object> keyValuePair in tempdic)
                 {
-                    if(DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(dataGridView1.Rows[0].Cells[1].Value)) >0 && DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(dataGridView1.Rows[1].Cells[1].Value))<0)
+                    if(DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox1.Text)) >0 && DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox2.Text)) <0)
 
                     richTextBox1.AppendText("\n" + keyValuePair.Key);
                     richTextBox1.AppendText("\n" + keyValuePair.Value);
@@ -175,54 +175,38 @@ namespace Outlook_extend
 
         }
 
-        private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
+
+        private void button3_Click(object sender, EventArgs e)
         {
-            
-            
+            var endDate = monthCalendar1.SelectionRange.End.ToShortDateString();
+            textBox2.Text = endDate;
         }
 
-        private void richTextBox2_TextChanged(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
-            
-           
+            var startDate = monthCalendar1.SelectionRange.Start.ToShortDateString();
 
+            textBox1.Text = startDate;
         }
 
-        private void richTextBox3_TextChanged(object sender, EventArgs e)
+        private void monthCalendar1_DateChanged(object sender, DateRangeEventArgs e)
         {
-            
-        }
-
-       
-
-        private void button2_Click_1(object sender, EventArgs e)
-        {
-
-            int MaxRows = 2;
-
-            
-
-            if (dataGridView1.Rows.Count < MaxRows)
-            {
-                int n = dataGridView1.Rows.Add();
-                dataGridView1.AllowUserToAddRows = true;
-                dataGridView1.Rows[n].Cells[0].Value = (n + 1).ToString();
-                dataGridView1.Rows[n].Cells[1].Value = dateTimePicker1.Value.ToString("MM-dd-yyyy");
-                
-            }
-
-            
-            else
-            {
-                dataGridView1.AllowUserToAddRows = false;
-            }
-
 
         }
 
-        private void dataGridView1_CellContentClick_1(object sender, DataGridViewCellEventArgs e)
+        private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void richTextBox2_TextChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 
