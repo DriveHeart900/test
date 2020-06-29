@@ -14,6 +14,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Outlook;
+using System.IO;
+using System.Diagnostics;
+
 
 namespace Outlook_extend
 {
@@ -23,6 +26,7 @@ namespace Outlook_extend
         Microsoft.Office.Interop.Outlook._NameSpace ns = null;
         Microsoft.Office.Interop.Outlook.Items sendEmailItems = null;
         
+        String myPath = Environment.CurrentDirectory;
         // githuub
         public Form1()
         {
@@ -31,8 +35,8 @@ namespace Outlook_extend
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
-            itemMapInfo();
+
+            ItemMapInfo(textBox1.Text, textBox2.Text, richTextBox2.Text);
 
             
             
@@ -43,58 +47,79 @@ namespace Outlook_extend
 
         }
 
-        //create map key:createTime-----value:System.__ComObject
 
 
-        public SortedDictionary<DateTime, object> itemMapInfo() {
+        /*
+        create map key:createTime-----value:System.__ComObject
+         
+        StartTime EndTime Subject filter all send items
+         
+        */
+        public SortedDictionary<DateTime, object> ItemMapInfo(string StartString, string EndString, string SubjectString) {
 
+            int countNum = 0;
+
+            //Store email filter by subject
             SortedDictionary<DateTime, object> tempdic = new SortedDictionary<DateTime, object>();
 
+            //Store emails filter by start & end time
+            //SortedDictionary<DateTime, object> tempdic2 = new SortedDictionary<DateTime, object>();
+            
             app = new Microsoft.Office.Interop.Outlook.Application();
             ns = app.GetNamespace("MAPI");
             ns.Logon("emailadress", "pwd", false, false);
+
+            //Get all sent items list
             sendEmailItems = ns.GetDefaultFolder(Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderSentMail).Items;
 
-
-            //sendEmailItems = sendEmailItems.Restrict("CreationTime");
-            //sendEmailItems = sendEmailItems.Sort("CreationTime", OlSortOrder.olDescending);
+            //Count No. of sent items.
             richTextBox1.AppendText("\n" + sendEmailItems.Count);
+            
             try
             {
 
                 foreach (object mail in sendEmailItems)
                 {
-                    if ((mail as Microsoft.Office.Interop.Outlook.MailItem) != null)
+                    //Filter needed  mail by subject in all mails
+                    
+                    if ((mail as Microsoft.Office.Interop.Outlook.MailItem) != null && (mail as Microsoft.Office.Interop.Outlook.MailItem).Subject.Contains(SubjectString) && DateTime.Compare((mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime, Convert.ToDateTime(textBox1.Text)) > 0 && DateTime.Compare((mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime, Convert.ToDateTime(textBox2.Text)) < 0)
                     {
 
                         //richTextBox1.AppendText( );
                         //richTextBox1.AppendText("Subject: " + (mail as Microsoft.Office.Interop.Outlook.MailItem).Subject);
                         //richTextBox1.AppendText("CreationTime: " + (mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime);
                         //richTextBox1.AppendText("HTMLBody: " + (mail as Microsoft.Office.Interop.Outlook.MailItem).HTMLBody);
-                        tempdic.Add((mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime, (mail as Microsoft.Office.Interop.Outlook.MailItem).Subject + "\n" + (mail as Microsoft.Office.Interop.Outlook.MailItem).Body) ;
+                        tempdic.Add((mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime, (mail as Microsoft.Office.Interop.Outlook.MailItem).Subject + "\n" + (mail as Microsoft.Office.Interop.Outlook.MailItem).HTMLBody);
                         
-
+                        if (tempdic.Count() == 0)
+                        {
+                            MessageBox.Show("Please check your selection for subject/time/sendmailbox");
+                        }
                     }
-                        
-       
+
+                  
                     
                 }
 
+                //Filter needed mail by starttime and endtime in all emails(sorted by time)
                 tempdic.OrderBy(KeyValuePair => KeyValuePair.Key);
                 foreach (KeyValuePair<DateTime, object> keyValuePair in tempdic)
                 {
-                    if(DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox1.Text)) >0 && DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox2.Text)) <0)
+                    
+                    if(DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox1.Text)) >0 && DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox2.Text)) < 0)
+                    {
+                        countNum++;
+                        richTextBox1.AppendText("\n" + keyValuePair.Key);
+                        richTextBox1.AppendText("\n" + keyValuePair.Value);
+                    }
 
-                    richTextBox1.AppendText("\n" + keyValuePair.Key);
-                    richTextBox1.AppendText("\n" + keyValuePair.Value);
-
-
+                    //tempdic2.Add(keyValuePair.Key, keyValuePair.Value);
                 }
 
+                richTextBox1.AppendText("\n all satisfied emails num are " + countNum);
 
-                //String path = System.Envrionment.currentDictionery;
-                //Path.Combine(Environment.CurrentDirectory, @"topologyInfo.xml"
-                //foreach (object mail in tempdic)
+
+                //foreach (object mail in tempdic2)
                 //{
                 //    if ((mail as Microsoft.Office.Interop.Outlook.MailItem) != null)
                 //    {
@@ -102,7 +127,7 @@ namespace Outlook_extend
                 //        (mail as Microsoft.Office.Interop.Outlook.MailItem).Saveas(path,5);
 
 
-                //    }
+                //}
 
 
 
@@ -208,6 +233,40 @@ namespace Outlook_extend
         {
 
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            richTextBox1.AppendText("Starting to install database...");
+        }
+
+
+        public void InstallSQL()
+        {
+            try
+            {
+                Process p = new Process();
+                ProcessStartInfo psi = new ProcessStartInfo();
+                psi.FileName = System.Windows.Forms.Application.StartupPath.Trim() + @"SQL2019-SSEI-Dev.exe";
+                //-q[n|b|r|f]   Sets user interface (UI) level:
+                //n = no UI
+                //b = basic UI (progress only, no prompts)
+                //r = reduced UI (dialog at the end of installation)
+                //f = full UI
+               
+                psi.WindowStyle = ProcessWindowStyle.Hidden;
+                psi.UseShellExecute = true;
+                psi.Verb = "runas";
+                psi.Arguments = "/qb username=\"fareast\\v-jili8\" companyname=\"Beyondsoft\" addlocal=ALL  disablenetworkprotocols=\"0\" instancename=\"outlook\" SECURITYMODE=\"SQL\" SAPWD=\"King12#$\"";
+                p.StartInfo = psi;
+                p.Start();
+            }
+            catch (System.Exception ee)
+            {
+                richTextBox1.AppendText(ee.ToString());
+            }
+        }
+
+
     }
 
 
@@ -224,12 +283,10 @@ namespace Outlook_extend
 
         }
 
-        public void sortTime() {
+       
 
-        
-        }
-        
 
-    
     }
+    
+
 }
