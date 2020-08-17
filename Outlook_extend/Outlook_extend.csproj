@@ -65,6 +65,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -119,6 +120,14 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resource\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="image\icons8-arrow-left-64.png" />
+    <Content Include="image\icons8-arrow-right-64.png" />
+    <Content Include="image\icons8-find-email-24.png" />
+    <Content Include="image\icons8-home-26.png" />
+    <Content Include="image\icons8-send-email-16.png" />
+    <Content Include="image\imail.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

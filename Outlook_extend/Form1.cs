@@ -25,29 +25,23 @@ namespace Outlook_extend
         Microsoft.Office.Interop.Outlook.Application app = null;
         Microsoft.Office.Interop.Outlook._NameSpace ns = null;
         Microsoft.Office.Interop.Outlook.Items sendEmailItems = null;
+
+        /// <summary>
+        /// start data means one filter with email's creation time start point
+        /// end data means one filter with email's creation time end point
+        /// </summary>
+        public DateTime startDate;
+        public DateTime endDate;
+        public int endpage = 1;
+        //Store email filter by subject
+        public SortedDictionary<DateTime, string> tempdic;
+        string myPathTemp = System.IO.Path.Combine(System.Windows.Forms.Application.StartupPath, "Results");
         
-        String myPath = Environment.CurrentDirectory;
         // githuub
         public Form1()
         {
             InitializeComponent();
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-            ItemMapInfo(textBox1.Text, textBox2.Text, richTextBox2.Text);
-
-            
-            
-        }
-
-        private void richTextBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-
 
         /*
         create map key:createTime-----value:System.__ComObject
@@ -55,16 +49,43 @@ namespace Outlook_extend
         StartTime EndTime Subject filter all send items
          
         */
-        public SortedDictionary<DateTime, object> ItemMapInfo(string StartString, string EndString, string SubjectString) {
+        public SortedDictionary<DateTime, string> ItemMapInfo(DateTime startDate, DateTime endDate, string subjectString)
+        {
+            
+            
+            string tempPath = System.IO.Path.GetTempPath();
+            //try delete before files
+            try
+            {    
+            string[] htmlList = Directory.GetFiles(tempPath, "*.html");
+            foreach (string f in htmlList)
+            {
+                File.Delete(f);
+            }
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
 
-            int countNum = 0;
+            if (string.IsNullOrEmpty(subjectString)) {
 
-            //Store email filter by subject
-            SortedDictionary<DateTime, object> tempdic = new SortedDictionary<DateTime, object>();
+                return null;
+            
+            }
+            if (string.IsNullOrEmpty(this.startDate.ToString())) {
+                return null;
+            }
+
+            if (string.IsNullOrEmpty(this.endDate.ToString()))
+            {
+                return null;
+            }
+           
 
             //Store emails filter by start & end time
             //SortedDictionary<DateTime, object> tempdic2 = new SortedDictionary<DateTime, object>();
-            
+
             app = new Microsoft.Office.Interop.Outlook.Application();
             ns = app.GetNamespace("MAPI");
             ns.Logon("emailadress", "pwd", false, false);
@@ -73,77 +94,56 @@ namespace Outlook_extend
             sendEmailItems = ns.GetDefaultFolder(Microsoft.Office.Interop.Outlook.OlDefaultFolders.olFolderSentMail).Items;
 
             //Count No. of sent items.
-            richTextBox1.AppendText("\n" + sendEmailItems.Count);
-            
+            //richTextBox1.AppendText("\n"+"Total send items = " + sendEmailItems.Count);
+
             try
             {
-
-                foreach (object mail in sendEmailItems)
+                
+                int countNum = 1;
+                
+                foreach (var mail in sendEmailItems)
                 {
+                    Microsoft.Office.Interop.Outlook.MailItem ml = mail as Microsoft.Office.Interop.Outlook.MailItem;
                     //Filter needed  mail by subject in all mails
-                    
-                    if ((mail as Microsoft.Office.Interop.Outlook.MailItem) != null && (mail as Microsoft.Office.Interop.Outlook.MailItem).Subject.Contains(SubjectString) && DateTime.Compare((mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime, Convert.ToDateTime(textBox1.Text)) > 0 && DateTime.Compare((mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime, Convert.ToDateTime(textBox2.Text)) < 0)
+
+                    if (ml != null)
                     {
-
-                        //richTextBox1.AppendText( );
-                        //richTextBox1.AppendText("Subject: " + (mail as Microsoft.Office.Interop.Outlook.MailItem).Subject);
-                        //richTextBox1.AppendText("CreationTime: " + (mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime);
-                        //richTextBox1.AppendText("HTMLBody: " + (mail as Microsoft.Office.Interop.Outlook.MailItem).HTMLBody);
-                        tempdic.Add((mail as Microsoft.Office.Interop.Outlook.MailItem).CreationTime, (mail as Microsoft.Office.Interop.Outlook.MailItem).Subject + "\n" + (mail as Microsoft.Office.Interop.Outlook.MailItem).HTMLBody);
-                        
-                        if (tempdic.Count() == 0)
+                        if (ml.Subject != null)
                         {
-                            MessageBox.Show("Please check your selection for subject/time/sendmailbox");
-                        }
-                    }
+                            if (ml.Subject.ToUpper().Contains(subjectString.ToUpper()))
+                            {
 
-                  
+                                if (DateTime.Compare(ml.CreationTime, startDate) > 0 && DateTime.Compare(ml.CreationTime, endDate) < 0)
+                                {
+                                    string mailTempPath = System.IO.Path.Combine(tempPath, countNum + ".html");
+                                    
+                                    ml.SaveAs(mailTempPath, OlSaveAsType.olHTML);
+                                    tempdic.Add(ml.CreationTime, ml.HTMLBody);
+                                    
+                                    countNum++;
+                                }
+
+
+                            }
+
+                        }
+
+                    }
                     
+
+                }
+                if (tempdic.Count() == 0)
+                {
+                    MessageBox.Show("Please check your selection for subject/time/sendmailbox");
                 }
 
                 //Filter needed mail by starttime and endtime in all emails(sorted by time)
                 tempdic.OrderBy(KeyValuePair => KeyValuePair.Key);
-                foreach (KeyValuePair<DateTime, object> keyValuePair in tempdic)
-                {
-                    
-                    if(DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox1.Text)) >0 && DateTime.Compare(keyValuePair.Key, Convert.ToDateTime(textBox2.Text)) < 0)
-                    {
-                        countNum++;
-                        richTextBox1.AppendText("\n" + keyValuePair.Key);
-                        richTextBox1.AppendText("\n" + keyValuePair.Value);
-                    }
-
-                    //tempdic2.Add(keyValuePair.Key, keyValuePair.Value);
-                }
-
-                richTextBox1.AppendText("\n all satisfied emails num are " + countNum);
-
-
-                //foreach (object mail in tempdic2)
-                //{
-                //    if ((mail as Microsoft.Office.Interop.Outlook.MailItem) != null)
-                //    {
-
-                //        (mail as Microsoft.Office.Interop.Outlook.MailItem).Saveas(path,5);
-
-
-                //}
-
-
-
-
-
-
-
-
-
-
-
 
             }
-            catch (System.Runtime.InteropServices.COMException ex)
+            catch (ObjectDisposedException ex)
             {
-                richTextBox1.AppendText(ex.ToString());
+                MessageBox.Show(ex.ToString());
             }
             finally
             {
@@ -156,62 +156,24 @@ namespace Outlook_extend
 
 
 
-        //Cumulative method to get list item in weekly report
-        /*
-            Day01 {issue, progress, teststatus, plan}
-            Day01 {issue2, progress2, teststatus2, plan2}
-            .
-            .
-            .
-            Weekly {issue + issue2+..., progress+progress2+..., plan+plan2+...}
-             */
-
-        public List<string> cumulativefunc(SortedDictionary<string, string> cumuDic) {
-
-
-            List<string> temp = new List<string>();
-            temp = null;
-            
-            //ensure data add from sorted dictionnary
-            /* day01--day02--day03--...*/
-            foreach (KeyValuePair<string, string> keyPare in cumuDic) {
-
-                temp.Add(keyPare.Key);
-             
-                if (!temp.Contains(keyPare.Key)) {
-
-                    temp.Add(keyPare + "---------Resolved");
-                    }
-
-                temp.Add(keyPare.Key);
-                
-                
-            
-            }
-
-
-            return temp;
-
-
-        }
-
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
 
 
-        private void button3_Click(object sender, EventArgs e)
-        {
-            var endDate = monthCalendar1.SelectionRange.End.ToShortDateString();
-            textBox2.Text = endDate;
-        }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            var startDate = monthCalendar1.SelectionRange.Start.ToShortDateString();
+            this.startDate = monthCalendar1.SelectionRange.Start;
 
-            textBox1.Text = startDate;
+            textBox1.Text = startDate.ToShortDateString();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            this.endDate = monthCalendar1.SelectionRange.End;
+            textBox2.Text = endDate.ToShortDateString();
         }
 
         private void monthCalendar1_DateChanged(object sender, DateRangeEventArgs e)
@@ -221,12 +183,14 @@ namespace Outlook_extend
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-
+            //MessageBox.Show("Start time : "+textBox1.Text);
+            ItemMapInfo(this.startDate, this.endDate, textBox4.Text);
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-
+            //MessageBox.Show("end time : " + textBox2.Text);
+            ItemMapInfo(this.startDate, this.endDate, textBox4.Text);
         }
 
         private void richTextBox2_TextChanged_1(object sender, EventArgs e)
@@ -236,56 +200,120 @@ namespace Outlook_extend
 
         private void button4_Click(object sender, EventArgs e)
         {
-            richTextBox1.AppendText("Starting to install database...");
+
         }
 
-
-        public void InstallSQL()
+        private void button1_Click(object sender, EventArgs e)
         {
+
             try
             {
-                Process p = new Process();
-                ProcessStartInfo psi = new ProcessStartInfo();
-                psi.FileName = System.Windows.Forms.Application.StartupPath.Trim() + @"SQL2019-SSEI-Dev.exe";
-                //-q[n|b|r|f]   Sets user interface (UI) level:
-                //n = no UI
-                //b = basic UI (progress only, no prompts)
-                //r = reduced UI (dialog at the end of installation)
-                //f = full UI
-               
-                psi.WindowStyle = ProcessWindowStyle.Hidden;
-                psi.UseShellExecute = true;
-                psi.Verb = "runas";
-                psi.Arguments = "/qb username=\"fareast\\v-jili8\" companyname=\"Beyondsoft\" addlocal=ALL  disablenetworkprotocols=\"0\" instancename=\"outlook\" SECURITYMODE=\"SQL\" SAPWD=\"King12#$\"";
-                p.StartInfo = psi;
-                p.Start();
+                string tempPath = System.IO.Path.GetTempPath();
+                string[] htmlList = Directory.GetFiles(tempPath, "*.html");
+                if(this.endpage <= htmlList.Count())
+                {
+                
+                textBox3.AppendText("Path:"+ System.IO.Path.Combine(tempPath, this.endpage + ".html"));
+
+
+                 webBrowser1.Navigate(System.IO.Path.Combine(tempPath, this.endpage + ".html"));
+
+
+                this.endpage++;
+                }
             }
-            catch (System.Exception ee)
+            catch (DirectoryNotFoundException ex)
             {
-                richTextBox1.AppendText(ee.ToString());
+                MessageBox.Show(ex.ToString());
+            }
+           
+
+        }
+
+
+        // Navigates to the given URL if it is valid.
+        private void Navigate(String address)
+        {
+            if (String.IsNullOrEmpty(address)) return;
+            if (address.Equals("about:blank")) return;
+            if (!address.StartsWith("http://") &&
+                !address.StartsWith("https://"))
+            {
+                address = "http://" + address;
+            }
+            try
+            {
+                webBrowser1.Navigate(new Uri(address));
+            }
+            catch (System.UriFormatException)
+            {
+                return;
             }
         }
+        //Conllect all email's body to a terminal one
+        private void collectionAllHtml(SortedDictionary<DateTime, string> tempdic) 
+        {
+            
+            foreach(var kp in tempdic)
+            {
+
+                richTextBox1.AppendText(kp.Value.ToString());
+
+            }
+        
+        
+        }
 
 
-    }
 
 
 
-    public class myMail {
 
-        public DateTime myDateTime { get; }
-        public string mySubject { get; }
-        public string myBody { get; }
-        public myMail(DateTime mytime, string subject, string body) {
-            myDateTime = mytime;
-            mySubject = subject;
-            myBody = body; 
+
+
+        private void webBrowser1_Navigated(object sender, WebBrowserNavigatedEventArgs e)
+        {
+           
+        }
+        private void button6_Click(object sender, EventArgs e)
+        {
+            webBrowser1.GoHome();
+        }
+
+        private void button4_Click_1(object sender, EventArgs e)
+        {
+            webBrowser1.GoBack();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            webBrowser1.GoForward();
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
 
         }
 
-       
+        private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            //CollectionAllEmail();
+        }
 
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            
+        }
 
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            collectionAllHtml(this.tempdic);
+        }
     }
     
 
