@@ -30,6 +30,16 @@ namespace Outlook_extend
         /// start data means one filter with email's creation time start point
         /// end data means one filter with email's creation time end point
         /// </summary>
+        /// 
+
+
+
+        ///<Unfinished module>
+        /// user interface authentication
+        /// data cleaning
+        ///</Unfinished module>
+    
+
         public DateTime startDate;
         public DateTime endDate;
         public int endpage = 1;
