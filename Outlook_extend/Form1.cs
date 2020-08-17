@@ -20,6 +20,8 @@ using System.Diagnostics;
 
 namespace Outlook_extend
 {
+    
+    
     public partial class Form1 : Form
     {
         Microsoft.Office.Interop.Outlook.Application app = null;
@@ -32,13 +34,17 @@ namespace Outlook_extend
         /// </summary>
         /// 
 
+        public void authenticationUser(string username, string pwd) { 
+        
+        
+        }
 
 
         ///<Unfinished module>
         /// user interface authentication
         /// data cleaning
         ///</Unfinished module>
-    
+
 
         public DateTime startDate;
         public DateTime endDate;
@@ -273,11 +279,6 @@ namespace Outlook_extend
         
         
         }
-
-
-
-
-
 
 
 
